@@ -16,10 +16,31 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
+    primary = Teal200,
+    onPrimary = White,
+    onPrimaryContainer = TealA700,
+    secondary = Teal200,
+    error = RedErrorLight,
+    background = Black2,
+    onBackground = Gray300,
+    surface = Black3,
+    onSurface = Gray200,
 )
 
 private val LightColorScheme = lightColorScheme(
+    primary = Teal200,
+    onPrimary = White,
+    onPrimaryContainer = TealA700,
+    secondary = Teal200,
+    onSecondary = Black1,
+    error = RedErrorDark,
+    onError = RedErrorLight,
+    background = BackGroundColor,
+    onBackground = onBackGround,
+    surface = SurfaceColor,
+    onSurface = onSurface,
 )
+
 
 @Composable
 fun MusicTheme(
@@ -29,25 +50,27 @@ fun MusicTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-      dynamicColor -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
+        dynamicColor -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
-      SideEffect {
-        val window = (view.context as Activity).window
-        window.statusBarColor = colorScheme.primary.toArgb()
-        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-      }
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
     }
 
     MaterialTheme(
-      colorScheme = colorScheme,
-      typography = Typography,
-      content = content
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content,
+        shapes = Shapes
     )
 }
