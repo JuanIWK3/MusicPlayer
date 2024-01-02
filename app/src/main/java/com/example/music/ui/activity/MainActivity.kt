@@ -1,4 +1,4 @@
-package com.example.music
+package com.example.music.ui.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
