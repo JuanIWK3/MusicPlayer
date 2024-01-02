@@ -30,5 +30,11 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private fun stop() {
         _player?.stop()
         _player?.reset()
+        _player?.release()
+        _player = null
+    }
+
+    private fun seekTo(position: Int) {
+        _player?.seekTo(position)
     }
 }
