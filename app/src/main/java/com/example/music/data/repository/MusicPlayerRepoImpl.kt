@@ -10,6 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * Implementation of [MusicPlayerRepository]
+ */
 class MusicPlayerRepoImpl @Inject constructor(
     private val metaDataHelper: MetaDataHelper
 ) : MusicPlayerRepository {

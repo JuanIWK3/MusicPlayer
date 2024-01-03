@@ -6,12 +6,12 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class MusicApp() : Application() {
-    override fun onCreate() {
-        super.onCreate()
+    override fun onCreate() { // onCreate is called when the application is started
+        super.onCreate() // super.onCreate is used to call the parent class's onCreate method
         println("MusicApp.onCreate")
     }
 
-    override fun onTerminate() {
-        super.onTerminate()
+    override fun onTerminate() { // onTerminate is called when the application is terminated
+        super.onTerminate() // super.onTerminate is used to call the parent class's onTerminate method
     }
 }

@@ -6,6 +6,9 @@ import androidx.activity.compose.setContent
 import com.example.music.app.MusicApp
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Main activity of the application
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
