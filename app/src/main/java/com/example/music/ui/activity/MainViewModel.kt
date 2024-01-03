@@ -2,6 +2,9 @@ package com.example.music.ui.activity
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.music.domain.model.AudioMetaData
@@ -24,8 +27,9 @@ class MainViewModel @Inject constructor(
     // Native MediaPlayer
     private var _player: MediaPlayer? = null
 
-    private var _state = MutableStateFlow(AudioPlayerState())
-    val state = _state.asStateFlow()
+    private var _state by mutableStateOf(AudioPlayerState())
+    val state: AudioPlayerState
+        get() = _state
 
     init {
         loadMedias()
@@ -44,10 +48,10 @@ class MainViewModel @Inject constructor(
 
     private fun loadMedias() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state = _state.copy(isLoading = true)
             val audios = mutableListOf<AudioMetaData>()
             audios.addAll(repository.getAudios())
-            _state.update { it.copy(isLoading = false, audios = audios) }
+            _state = _state.copy(isLoading = false, audios = audios)
         }
     }
 
@@ -60,7 +64,7 @@ class MainViewModel @Inject constructor(
 
     private fun initAudio(audio: AudioMetaData, context: Context) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state = _state.copy(isLoading = true)
 
             delay(800)
 
@@ -71,19 +75,22 @@ class MainViewModel @Inject constructor(
                 prepare()
             }
 
-            _state.update { it.copy(isLoading = false) }
+            _state = _state.copy(
+                isLoading = false,
+                selectedAudio = audio.copy(cover = cover)
+            )
 
         }
     }
 
     private fun play() {
-        _state.update { it.copy(isPlaying = true) }
+        _state = _state.copy(isPlaying = true)
 
         _player?.start()
     }
 
     private fun pause() {
-        _state.update { it.copy(isPlaying = false) }
+        _state = _state.copy(isPlaying = false)
 
         _player?.pause()
     }
@@ -93,7 +100,7 @@ class MainViewModel @Inject constructor(
         _player?.reset()
         _player?.release()
 
-        _state.update { it.copy(isPlaying = false) }
+        _state = _state.copy(isPlaying = false)
 
         _player = null
     }

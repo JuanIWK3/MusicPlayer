@@ -17,5 +17,4 @@ sealed class AudioPlayerEvent {
     data object Pause : AudioPlayerEvent()
     data object Stop : AudioPlayerEvent()
     data object LoadMedia : AudioPlayerEvent()
-
 }
