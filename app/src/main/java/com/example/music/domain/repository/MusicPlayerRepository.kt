@@ -17,5 +17,5 @@ interface MusicPlayerRepository {
     /**
      * Get the cover of the audio
      */
-    suspend fun getCover(context: Context, uri: Uri): Bitmap?
+    suspend fun loadCoverBitmap(context: Context, uri: Uri): Bitmap?
 }

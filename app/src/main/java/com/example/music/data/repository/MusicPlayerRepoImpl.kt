@@ -22,7 +22,7 @@ class MusicPlayerRepoImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCover(context: Context, uri: Uri): Bitmap? {
+    override suspend fun loadCoverBitmap(context: Context, uri: Uri): Bitmap? {
         return withContext(Dispatchers.IO) {
             metaDataHelper.getCover(context, uri)
         }
