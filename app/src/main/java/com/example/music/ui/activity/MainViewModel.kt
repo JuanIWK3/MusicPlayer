@@ -11,25 +11,19 @@ import com.example.music.domain.model.AudioMetaData
 import com.example.music.domain.repository.MusicPlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * ViewModel for [MainActivity]
- */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: MusicPlayerRepository
 ) : ViewModel() {
-    // Native MediaPlayer
-    private var _player: MediaPlayer? = null
 
     private var _state by mutableStateOf(AudioPlayerState())
     val state: AudioPlayerState
         get() = _state
+
+    private var _player: MediaPlayer? = null
 
     init {
         loadMedias()
@@ -37,7 +31,12 @@ class MainViewModel @Inject constructor(
 
     fun onEvent(event: AudioPlayerEvent) {
         when (event) {
-            is AudioPlayerEvent.InitAudio -> initAudio(event.audio, event.context)
+            is AudioPlayerEvent.InitAudio -> initAudio(
+                event.audio,
+                event.context,
+                onAudioInitialized = event.onAudioInitialized
+            )
+
             is AudioPlayerEvent.SeekTo -> seekTo(event.position)
             is AudioPlayerEvent.Play -> play()
             is AudioPlayerEvent.Pause -> pause()
@@ -62,7 +61,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun initAudio(audio: AudioMetaData, context: Context) {
+    private fun initAudio(audio: AudioMetaData, context: Context, onAudioInitialized: () -> Unit) {
         viewModelScope.launch {
             _state = _state.copy(isLoading = true)
 
@@ -70,16 +69,25 @@ class MainViewModel @Inject constructor(
 
             val cover = repository.loadCoverBitmap(context, audio.contentUri)
 
-            _player = MediaPlayer().apply {
-                setDataSource(context, audio.contentUri)
-                prepare()
-            }
-
             _state = _state.copy(
                 isLoading = false,
                 selectedAudio = audio.copy(cover = cover)
             )
 
+            _player = MediaPlayer().apply {
+                setDataSource(context, audio.contentUri)
+                prepare()
+            }
+
+            _player?.setOnCompletionListener {
+                pause()
+            }
+
+            _player?.setOnPreparedListener {
+                onAudioInitialized()
+            }
+
+            _state = _state.copy(isLoading = false)
         }
     }
 

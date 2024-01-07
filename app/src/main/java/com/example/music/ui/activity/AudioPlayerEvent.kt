@@ -6,7 +6,8 @@ import com.example.music.domain.model.AudioMetaData
 sealed class AudioPlayerEvent {
     data class InitAudio(
         val audio: AudioMetaData,
-        val context: Context
+        val context: Context,
+        val onAudioInitialized: () -> Unit
     ) : AudioPlayerEvent()
 
     data class SeekTo(
