@@ -5,6 +5,7 @@ import android.media.AudioMetadata
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +16,8 @@ import com.example.music.domain.model.AudioMetaData
 import com.example.music.domain.repository.MusicPlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,11 +50,21 @@ class MainViewModel @Inject constructor(
 
             is AudioPlayerEvent.LikeOrNotSong -> likeOrNotSong(id = event.id)
 
+            is AudioPlayerEvent.ShowLikedSongs -> showLikedSongs()
+
             is AudioPlayerEvent.Play -> play()
             is AudioPlayerEvent.Pause -> pause()
             is AudioPlayerEvent.Stop -> stop()
             is AudioPlayerEvent.HideLoadingDialog -> hideLoadingDialog()
             is AudioPlayerEvent.LoadMedia -> loadMedias()
+
+        }
+    }
+
+    private fun showLikedSongs() {
+        println("showLikedSongs")
+        viewModelScope.launch {
+            _state = _state.copy(showLikedSongs = !state.showLikedSongs)
         }
     }
 
@@ -61,6 +74,7 @@ class MainViewModel @Inject constructor(
             val audios = mutableStateListOf<AudioMetaData>()
             audios.addAll(prepareAudios())
             _state = _state.copy(audios = audios)
+
             repository.getLikedSongs().collect { likedSongs ->
                 _state = _state.copy(
                     likedSongs = likedSongs,
@@ -71,10 +85,22 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun prepareAudios(): List<AudioMetaData> {
-        return repository.getAudios().map { audio ->
+        var shouldShowWhatsappSongs = repository.shouldShowWhatsappSongs().first()
+
+        var audios = repository.getAudios().map { audio ->
+            val show: Boolean = repository.shouldShowWhatsappSongs().first()
             val artist = if (audio.artist.contains("<unknown>")) "Unknown artist" else audio.artist
             audio.copy(artist = artist)
+
+        }.filter { audio ->
+            if (shouldShowWhatsappSongs) {
+                true
+            } else {
+                !audio.title.contains("AUD-")
+            }
         }
+
+        return audios
     }
 
     private fun initAudio(audio: AudioMetaData, context: Context, onAudioInitialized: () -> Unit) {

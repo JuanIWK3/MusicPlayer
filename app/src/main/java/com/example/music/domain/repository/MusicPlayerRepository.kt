@@ -4,9 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.example.music.domain.model.AudioMetaData
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 /**
  * Repository for the music player
@@ -25,4 +23,7 @@ interface MusicPlayerRepository {
     suspend fun likeOrNotSong(id: Long)
 
     fun getLikedSongs(): Flow<List<Long>>
+
+    fun shouldShowWhatsappSongs(): Flow<Boolean>
 }
+

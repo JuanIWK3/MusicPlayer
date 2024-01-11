@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activity.PlaylistActivity"
+            android:name=".ui.activity.ConfigActivity"
             android:exported="true"
             android:theme="@style/Theme.Music" />
     </application>

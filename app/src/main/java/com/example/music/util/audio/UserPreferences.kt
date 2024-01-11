@@ -3,6 +3,7 @@ package com.example.music.util.audio
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -61,12 +62,26 @@ class UserPreferences @Inject constructor(@ApplicationContext val context: Conte
         }
     }
 
+    private val _showWhatsAppAudios: Flow<Boolean?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[SHOW_WHATSAPP_AUDIOS_KEY]
+        }
+
+    val showWhatsAppAudios: Flow<Boolean> = _showWhatsAppAudios.map { it ?: true }
+
+    suspend fun setShowWhatsAppAudios(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[SHOW_WHATSAPP_AUDIOS_KEY] = show
+        }
+    }
+
     companion object {
         private const val MUSIC_PLAYER_PREFERENCES = "MusicPlayer"
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
             MUSIC_PLAYER_PREFERENCES
         )
         private val LIKED_SONGS_KEY = stringPreferencesKey("LIKED_SONGS")
+        private val SHOW_WHATSAPP_AUDIOS_KEY = booleanPreferencesKey("SHOW_WHATSAPP_AUDIOS")
     }
 
 }

@@ -8,5 +8,6 @@ data class AudioPlayerState (
     val selectedAudio: AudioMetaData = AudioMetaData.emptyMetadata(),
     val isPlaying: Boolean = false,
     val currentPosition: Int = 0,
-    val likedSongs: List<Long> = emptyList()
+    val likedSongs: List<Long> = emptyList(),
+    val showLikedSongs: Boolean = false,
 )

@@ -142,9 +142,9 @@ class MainActivity : ComponentActivity() {
                             actions = {
                                 IconButton(onClick = {
                                     scope.launch {
-                                        if (state.audios.isEmpty()) {
-                                            mainViewModel.onEvent(event = AudioPlayerEvent.LoadMedia)
-                                        }
+//                                        if (state.audios.isEmpty()) {
+                                        mainViewModel.onEvent(event = AudioPlayerEvent.LoadMedia)
+//                                        }
                                         showBottomSheet = true
                                         sheetState.show()
                                     }
@@ -159,7 +159,7 @@ class MainActivity : ComponentActivity() {
                                     context.startActivity(
                                         Intent(
                                             context,
-                                            PlaylistActivity::class.java
+                                            ConfigActivity::class.java
                                         )
                                     )
                                 }) {
@@ -308,32 +308,85 @@ class MainActivity : ComponentActivity() {
                                         color = MaterialTheme.colorScheme.onBackground
                                     )
                                 }
-                                state.audios.forEach { audio ->
-                                    Track(audio = audio,
-                                        isPlaying = audio.id == state.selectedAudio.id,
-                                        modifier = Modifier
-                                            .padding(
-                                                horizontal = 8.dp, vertical = 10.dp
-                                            )
-                                            .requiredHeight(height = 100.dp),
+                                // Check box to show liked songs
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.lbl_show_liked_songs),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(bottom = 3.dp, top = 12.dp),
+                                        textDecoration = TextDecoration.Underline,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                    LikeButton(isLiked = state.showLikedSongs,
+                                        enabled = true,
                                         onClick = {
-                                            scope.launch {
-                                                mainViewModel.onEvent(event = AudioPlayerEvent.Stop)
-                                                sheetState.hide()
-                                                mainViewModel.onEvent(
-                                                    event = AudioPlayerEvent.InitAudio(audio = it,
-                                                        context = context,
-                                                        onAudioInitialized = {
-                                                            mainViewModel.onEvent(event = AudioPlayerEvent.Play)
-                                                        })
+                                            mainViewModel.onEvent(event = AudioPlayerEvent.ShowLikedSongs)
+                                        }
+                                    )
+                                }
+
+                                if (state.showLikedSongs) {
+                                    state.likedSongs.forEach { id ->
+                                        state.audios.find { it.id == id }?.let { audio ->
+                                            Track(audio = audio,
+                                                isPlaying = audio.id == state.selectedAudio.id,
+                                                modifier = Modifier
+                                                    .padding(
+                                                        horizontal = 8.dp, vertical = 10.dp
+                                                    )
+                                                    .requiredHeight(height = 100.dp),
+                                                onClick = {
+                                                    scope.launch {
+                                                        mainViewModel.onEvent(event = AudioPlayerEvent.Stop)
+                                                        sheetState.hide()
+                                                        mainViewModel.onEvent(
+                                                            event = AudioPlayerEvent.InitAudio(audio = it,
+                                                                context = context,
+                                                                onAudioInitialized = {
+                                                                    mainViewModel.onEvent(event = AudioPlayerEvent.Play)
+                                                                })
+                                                        )
+                                                    }.invokeOnCompletion {
+                                                        if (!sheetState.isVisible) {
+                                                            showBottomSheet = false
+                                                        }
+                                                    }
+                                                })
+                                            Divider(modifier = Modifier.padding(horizontal = 8.dp))
+                                        }
+                                    }
+                                } else {
+                                    state.audios.forEach { audio ->
+                                        Track(audio = audio,
+                                            isPlaying = audio.id == state.selectedAudio.id,
+                                            modifier = Modifier
+                                                .padding(
+                                                    horizontal = 8.dp, vertical = 10.dp
                                                 )
-                                            }.invokeOnCompletion {
-                                                if (!sheetState.isVisible) {
-                                                    showBottomSheet = false
+                                                .requiredHeight(height = 100.dp),
+                                            onClick = {
+                                                scope.launch {
+                                                    mainViewModel.onEvent(event = AudioPlayerEvent.Stop)
+                                                    sheetState.hide()
+                                                    mainViewModel.onEvent(
+                                                        event = AudioPlayerEvent.InitAudio(audio = it,
+                                                            context = context,
+                                                            onAudioInitialized = {
+                                                                mainViewModel.onEvent(event = AudioPlayerEvent.Play)
+                                                            })
+                                                    )
+                                                }.invokeOnCompletion {
+                                                    if (!sheetState.isVisible) {
+                                                        showBottomSheet = false
+                                                    }
                                                 }
-                                            }
-                                        })
-                                    Divider(modifier = Modifier.padding(horizontal = 8.dp))
+                                            })
+                                        Divider(modifier = Modifier.padding(horizontal = 8.dp))
+                                    }
                                 }
                             }
                         }

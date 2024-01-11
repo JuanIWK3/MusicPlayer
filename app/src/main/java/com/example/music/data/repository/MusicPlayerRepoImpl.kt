@@ -32,12 +32,16 @@ class MusicPlayerRepoImpl @Inject constructor(
     }
 
     override suspend fun likeOrNotSong(id: Long) {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             userPreferences.likeOrNotSong(id = id)
         }
     }
 
     override fun getLikedSongs(): Flow<List<Long>> {
         return userPreferences.likedSongs
+    }
+
+    override fun shouldShowWhatsappSongs(): Flow<Boolean> {
+        return userPreferences.showWhatsAppAudios
     }
 }
