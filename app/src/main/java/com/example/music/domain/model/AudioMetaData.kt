@@ -27,4 +27,7 @@ data class AudioMetaData(
         }
     }
 
+    fun isNotEmpty(): Boolean {
+        return this != emptyMetadata()
+    }
 }
