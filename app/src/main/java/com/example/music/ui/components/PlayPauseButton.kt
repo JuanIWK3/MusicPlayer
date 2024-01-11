@@ -50,5 +50,4 @@ fun PlayPauseButton(
             tint = if (enabled) MaterialTheme.colorScheme.onPrimary else Gray300
         )
     }
-
 }

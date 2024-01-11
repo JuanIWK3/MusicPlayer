@@ -36,18 +36,6 @@ fun LikeButton(
 
     val transition = updateTransition(targetState = isLiked, label = "transition")
 
-    val size by transition.animateDp(transitionSpec = {
-        keyframes {
-            durationMillis = 500
-            buttonSize + 10.dp at 250 with LinearOutSlowInEasing
-            buttonSize at 400 with LinearOutSlowInEasing
-        }
-    }, label = "size",
-        targetValueByState = { state ->
-            if (state) buttonSize else buttonSize
-        }
-    )
-
     val shouldBeAnimated = remember { mutableStateOf(value = false) }
 
     Icon(
@@ -67,7 +55,7 @@ fun LikeButton(
                 interactionSource = remember { MutableInteractionSource() },
                 role = Role.Button
             )
-            .size(size = if (shouldBeAnimated.value) size else buttonSize)
+            .size(size = buttonSize)
     )
 
 }
