@@ -1,8 +1,12 @@
 package com.example.music.ui.activity
 
 import android.content.Context
+import android.media.AudioMetadata
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -25,6 +29,8 @@ class MainViewModel @Inject constructor(
 
     private var _player: MediaPlayer? = null
 
+    private val _handler = Handler(Looper.getMainLooper())
+
     init {
         loadMedias()
     }
@@ -37,10 +43,14 @@ class MainViewModel @Inject constructor(
                 onAudioInitialized = event.onAudioInitialized
             )
 
-            is AudioPlayerEvent.SeekTo -> seekTo(event.position)
+            is AudioPlayerEvent.SeekTo -> seekTo(position = event.position)
+
+            is AudioPlayerEvent.LikeOrNotSong -> likeOrNotSong(id = event.id)
+
             is AudioPlayerEvent.Play -> play()
             is AudioPlayerEvent.Pause -> pause()
             is AudioPlayerEvent.Stop -> stop()
+            is AudioPlayerEvent.HideLoadingDialog -> hideLoadingDialog()
             is AudioPlayerEvent.LoadMedia -> loadMedias()
         }
     }
@@ -48,15 +58,21 @@ class MainViewModel @Inject constructor(
     private fun loadMedias() {
         viewModelScope.launch {
             _state = _state.copy(isLoading = true)
-            val audios = mutableListOf<AudioMetaData>()
-            audios.addAll(repository.getAudios())
-            _state = _state.copy(isLoading = false, audios = audios)
+            val audios = mutableStateListOf<AudioMetaData>()
+            audios.addAll(prepareAudios())
+            _state = _state.copy(audios = audios)
+            repository.getLikedSongs().collect { likedSongs ->
+                _state = _state.copy(
+                    likedSongs = likedSongs,
+                    isLoading = false,
+                )
+            }
         }
     }
 
     private suspend fun prepareAudios(): List<AudioMetaData> {
         return repository.getAudios().map { audio ->
-            val artist = if (audio.artist.contains("<unknown>")) "Unknown" else audio.artist
+            val artist = if (audio.artist.contains("<unknown>")) "Unknown artist" else audio.artist
             audio.copy(artist = artist)
         }
     }
@@ -95,6 +111,18 @@ class MainViewModel @Inject constructor(
         _state = _state.copy(isPlaying = true)
 
         _player?.start()
+
+        _handler.postDelayed(object : Runnable {
+            override fun run() {
+                try {
+                    _state = _state.copy(currentPosition = _player!!.currentPosition)
+                    _handler.postDelayed(this, 1000)
+                } catch (exp: Exception) {
+                    _state = _state.copy(currentPosition = 0)
+                }
+            }
+
+        }, 0)
     }
 
     private fun pause() {
@@ -116,6 +144,16 @@ class MainViewModel @Inject constructor(
     private fun seekTo(position: Float) {
         _player?.run {
             seekTo(position.toInt())
+        }
+    }
+
+    private fun hideLoadingDialog() {
+        _state = _state.copy(isLoading = false)
+    }
+
+    private fun likeOrNotSong(id: Long) {
+        viewModelScope.launch {
+            repository.likeOrNotSong(id = id)
         }
     }
 }
